@@ -29,6 +29,7 @@ import { BaseClasses } from "@spt/models/enums/BaseClasses"
 
 import config from "../config/config.json"
 import tiers from "../config/tiers.json"
+import tiers_hex from "../config/tiers_hex.json"
 import translations from "./translations.json"
 import { IItem } from "@spt/models/eft/common/tables/IItem"
 
@@ -726,37 +727,47 @@ class ItemInfo implements IPostDBLoadMod {
 						}
 					}
 
+					let tiers_hexcode = ""
 					if (itemRarity === 7) {
 						tier = i18n.OVERPOWERED
 						item._props.BackgroundColor = tiers.OVERPOWERED
+						tiers_hexcode = tiers_hex.OVERPOWERED
 						// log(`${itemID} | ${this.getItemName(itemID)}`)
 					} else if (itemRarity === 1) {
 						tier = i18n.COMMON
 						item._props.BackgroundColor = tiers.COMMON
+						tiers_hexcode = tiers_hex.COMMON
 					} else if (itemRarity === 2) {
 						tier = i18n.RARE
 						item._props.BackgroundColor = tiers.RARE
+						tiers_hexcode = tiers_hex.RARE
 					} else if (itemRarity === 3) {
 						tier = i18n.EPIC
 						item._props.BackgroundColor = tiers.EPIC
+						tiers_hexcode = tiers_hex.EPIC
 					} else if (itemRarity === 4) {
 						tier = i18n.LEGENDARY
 						item._props.BackgroundColor = tiers.LEGENDARY
+						tiers_hexcode = tiers_hex.LEGENDARY
 					} else if (itemRarity === 5) {
 						tier = i18n.UBER
 						item._props.BackgroundColor = tiers.UBER
+						tiers_hexcode = tiers_hex.UBER
 					} else if (itemRarity === 6) {
 						// can get 6 from custom rules only
 						tier = i18n.UNOBTAINIUM
 						item._props.BackgroundColor = tiers.UNOBTAINIUM
+						tiers_hexcode = tiers_hex.UNOBTAINIUM
 					} else if (itemRarity === 8) {
 						// 8 is for custom dim red background
 						tier = i18n.CUSTOM
 						item._props.BackgroundColor = tiers.CUSTOM
+						tiers_hexcode = tiers_hex.CUSTOM
 					} else if (itemRarity >= 9) {
 						// 8 is for custom dim orange background
 						tier = i18n.CUSTOM2
 						item._props.BackgroundColor = tiers.CUSTOM2
+						tiers_hexcode = tiers_hex.CUSTOM2
 					}
 
 					if (config.RarityRecolor.fallbackValueBasedRecolor && itemRarity === 0) {
@@ -780,24 +791,32 @@ class ItemInfo implements IPostDBLoadMod {
 						if (itemValue < Number.parseInt(tiers.COMMON_VALUE_FALLBACK)) {
 							tier = i18n.COMMON
 							item._props.BackgroundColor = tiers.COMMON
+							tiers_hexcode = tiers_hex.COMMON
 						} else if (itemValue < Number.parseInt(tiers.RARE_VALUE_FALLBACK)) {
 							tier = i18n.RARE
 							item._props.BackgroundColor = tiers.RARE
+							tiers_hexcode = tiers_hex.RARE
 						} else if (itemValue < Number.parseInt(tiers.EPIC_VALUE_FALLBACK)) {
 							tier = i18n.EPIC
 							item._props.BackgroundColor = tiers.EPIC
+							tiers_hexcode = tiers_hex.EPIC
 						} else if (itemValue < Number.parseInt(tiers.LEGENDARY_VALUE_FALLBACK)) {
 							tier = i18n.LEGENDARY
 							item._props.BackgroundColor = tiers.LEGENDARY
+							tiers_hexcode = tiers_hex.LEGENDARY
 						} else if (itemValue < Number.parseInt(tiers.UBER_VALUE_FALLBACK)) {
 							tier = i18n.UBER
 							item._props.BackgroundColor = tiers.UBER
+							tiers_hexcode = tiers_hex.UBER
 						} else {
 							// log(`"${itemID}", // ${name}, ${item._props.BackgroundColor}, ${itemValue}`)
 							tier = i18n.UNOBTAINIUM
 							item._props.BackgroundColor = tiers.UNOBTAINIUM
+							tiers_hexcode = tiers_hex.UNOBTAINIUM
 						}
 					}
+
+					this.addColorToName(itemID, tiers_hexcode)
 
 					if (config.RarityRecolor.addTierNameToPricesInfo) {
 						if (tier?.length > 0) {
@@ -1247,6 +1266,11 @@ Weight: ${ammoProps.Weight}
 					break
 			}
 		}
+	}
+
+	addColorToName(itemID: string, tiers_hexcode: string): void {
+		// Add color to name
+		this.locales["en"][`${itemID} Name`] = `<b><color=${tiers_hexcode}>${this.getItemName(itemID, "en")}</color></b>`
 	}
 
 	addToDescription(itemID: string, addToDescription: string, place: "prepend" | "append", lang = ""): void {
