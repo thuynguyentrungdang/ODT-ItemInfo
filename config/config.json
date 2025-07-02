@@ -18,6 +18,7 @@
 		"_description_fallbackValueBasedRecolor": "If item is unbuyable from traders, fallsback to slot value rarity tiering.",
 		"bypassAmmoRecolor": false,
 		"bypassKeysRecolor": false,
+		"colorItemNames": false,
 		"customRarity": {
 			"Use https://db.sp-tarkov.com/search to find itemID you are interested in.": "Custom rarity values: COMMON 1, RARE 2, EPIC 3, LEGENDARY 4, UBER 5, UNOBTAINIUM 6, OVERPOWERED 7, CUSTOM 8 (dim red BG), CUSTOM 9 (called orange, but actually brown)",
 			"add itemID here": "add rarity here",
