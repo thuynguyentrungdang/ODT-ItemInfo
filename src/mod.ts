@@ -1742,8 +1742,6 @@ Weight: ${ammoProps.Weight}
 
 					for (const item of results.items) {
 
-						if (!item || typeof item._tpl !== "string") continue;
-						
 						if (item._tpl.includes(itemID)) {
 							// prettier-ignore
 							// unlockString += `${splitRewardString[0]}${traderName} ${translations[locale].lv}${ll}${splitRewardString[1]} > "${questName}"\n`
