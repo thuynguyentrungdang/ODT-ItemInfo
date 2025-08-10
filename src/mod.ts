@@ -1275,7 +1275,7 @@ Weight: ${ammoProps.Weight}
 				this.addColorToName(itemID, tiers_hexcode, locale)
 			}
 		} else {
-			this.locales["en"][`${itemID} Name`] = `<b><color=${tiers_hexcode}>${this.getItemName(itemID, "en")}</color></b>`
+			this.locales[lang][`${itemID} Name`] = `<b><color=${tiers_hexcode}>${this.getItemName(itemID, "en")}</color></b>`
 		}
 	}
 
