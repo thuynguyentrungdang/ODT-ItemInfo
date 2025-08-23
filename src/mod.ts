@@ -6,7 +6,7 @@
 import { DependencyContainer } from "tsyringe"
 
 import { ConfigTypes } from "@spt/models/enums/ConfigTypes"
-import { IPostDBLoadMod } from "@spt/models/external/IPostDBLoadMod"
+import { IPostSptLoadMod } from "@spt/models/external/IPostSptLoadMod"
 import { IHideoutConfig } from "@spt/models/spt/config/IHideoutConfig"
 import { IRagfairConfig } from "@spt/models/spt/config/IRagfairConfig"
 import { LogBackgroundColor } from "@spt/models/spt/logging/LogBackgroundColor"
@@ -31,6 +31,7 @@ import config from "../config/config.json"
 import tiers from "../config/tiers.json"
 import translations from "./translations.json"
 import { IItem } from "@spt/models/eft/common/tables/IItem"
+import { ItemTpl } from "@spt/models/enums/ItemTpl"
 
 // Using `this.` is perfectly fine. Much better than having ambiguous and typeless variables declared in some global scope
 // Don't worry - there's always opportunities to learn :) - Terkoiz
@@ -388,7 +389,7 @@ const bsgBlacklist = [
 	"67124dcfa3541f2a1f0e788b", // MPS Auto Assault-12 Gen 2 12ga automatic shotgun
 ]
 
-class ItemInfo implements IPostDBLoadMod {
+class ItemInfo implements IPostSptLoadMod {
 	database: DatabaseServer
 	configServer: ConfigServer
 	itemBaseClassService: ItemBaseClassService
@@ -447,7 +448,7 @@ class ItemInfo implements IPostDBLoadMod {
 		]
 	}
 
-	public postDBLoad(container: DependencyContainer) {
+	public postSptLoad(container: DependencyContainer) {
 		this.logger = container.resolve<ILogger>("WinstonLogger")
 
 		// TODO: With order.json being a thing, this can probably be removed and instead instructions for changing load order could be added
@@ -533,8 +534,8 @@ class ItemInfo implements IPostDBLoadMod {
 		// P.S. Is there a way to access last user selected locale at IPreAkiLoadMod?
 		//}
 
-		this.euroRatio = this.handbook.Items.find((x) => x.Id === "569668774bdc2da2298b4568").Price
-		this.dollarRatio = this.handbook.Items.find((x) => x.Id === "5696686a4bdc2da3298b456a").Price
+		this.euroRatio = this.handbook.Items.find((x) => x.Id === ItemTpl.MONEY_EUROS).Price
+		this.dollarRatio = this.handbook.Items.find((x) => x.Id === ItemTpl.MONEY_DOLLARS).Price
 
 		this.questRewardsDB = {}
 
@@ -587,7 +588,7 @@ class ItemInfo implements IPostDBLoadMod {
 				item._type === "Item" && // Check if the item is a real item and not a "node" type.
 				itemInHandbook !== undefined && // Ignore "useless" items
 				!item._props.QuestItem && // Ignore quest items.
-				item._parent !== "543be5dd4bdc2deb348b4569" // Ignore currencies.
+				item._parent !== BaseClasses.MONEY // Ignore currencies.
 			) {
 				const name = this.getItemName(itemID, userLocale) // for debug only
 				// item._props.ExaminedByDefault = true // DEBUG!!!
@@ -636,7 +637,7 @@ class ItemInfo implements IPostDBLoadMod {
 				// let RarityPvE = item._props.RarityPvE
 				// log(`${this.getItemName(itemID)} | ${RarityPvE}`)
 				let isBanned = false
-				if (config.useBSGStaticFleaBanlist) {
+				if (config.useBSGStaticFleaBanlist.enabled) {
 					isBanned = bsgBlacklist.includes(itemID)
 				} else {
 					isBanned = !item._props.CanSellOnRagfair
@@ -660,7 +661,7 @@ class ItemInfo implements IPostDBLoadMod {
 						this.itemHelper.isOfBaseclass(itemID, BaseClasses.ARMOR_PLATE) ||
 						this.itemHelper.isOfBaseclass(itemID, BaseClasses.VEST) ||
 						this.itemHelper.isOfBaseclass(itemID, BaseClasses.WEAPON) ||
-						item._parent === "57bef4c42459772e8d35a53b") && // strictly ARMORED_EQUIPMENT
+						item._parent === BaseClasses.ARMORED_EQUIPMENT) && // strictly ARMORED_EQUIPMENT
 					barterInfo.barters.length === 0 &&
 					!isBanned
 				) {
@@ -674,7 +675,7 @@ class ItemInfo implements IPostDBLoadMod {
 					// log(`${this.getItemName(itemID)}, ${itemRarity} | ${rarityArray}`)
 				}
 
-				if (item._parent === "543be5cb4bdc2deb348b4568") {
+				if (item._parent === BaseClasses.AMMO_BOX) {
 					// Ammo boxes special case
 					const count = item._props.StackSlots[0]._max_count
 					const ammo = item._props.StackSlots[0]._props.filters[0].Filter[0]
@@ -768,7 +769,7 @@ class ItemInfo implements IPostDBLoadMod {
 						}
 						// log(`"${itemID}", // ${name}, ${item._props.BackgroundColor}, ${itemValue}`)
 
-						if (item._parent === "543be5cb4bdc2deb348b4568") {
+						if (item._parent === BaseClasses.AMMO_BOX) {
 							// Ammo boxes special case
 							const count = item._props.StackSlots[0]._max_count
 							const ammo = item._props.StackSlots[0]._props.filters[0].Filter[0]
@@ -826,7 +827,7 @@ class ItemInfo implements IPostDBLoadMod {
 				}
 
 				if (config.AdvancedAmmoInfo.enabled) {
-					if (item._parent === "5485a8684bdc2da71d8b4567") {
+					if (item._parent === BaseClasses.AMMO) {
 						const ammoProps = item._props
 
 						// welcome to JS hell.
@@ -929,7 +930,7 @@ Weight: ${ammoProps.Weight}
 						fleaValue = fleaPrice / slotDensity
 					}
 
-					if (this.items[itemID]._parent !== "5795f317245977243854e041") {
+					if (this.items[itemID]._parent !== BaseClasses.SIMPLE_CONTAINER) {
 						// ignore containers
 						if (itemvalue > config.MarkValueableItems.traderSlotValueThresholdBest || fleaValue > config.MarkValueableItems.fleaSlotValueThresholdBest) {
 							if (userLocale === "jp" || userLocale === "kr" || config.MarkValueableItems.useAltValueMarks) {
@@ -986,7 +987,7 @@ Weight: ${ammoProps.Weight}
 						const thresh = item._props.CompressorThreshold
 						// prettier-ignore
 						// headsetDescription = `${i18n.AmbientVolume}: ${item._props.AmbientCompressorSendLevel+10}dB | ${i18n.Compressor}: ${i18n.Gain} +${gain}dB × ${i18n.Treshold} ${thresh}dB ≈ ×${Math.abs((gain * (thresh+20)) / 10)} ${i18n.Boost} | ${i18n.ResonanceFilter}: ${item._props.HighpassResonance}@${item._props.HighpassFreq}Hz | ${i18n.Distortion}: ${Math.round(item._props.Distortion * 100)}%` + newLine + newLine;
-						headsetDescription = `${i18n.AmbientVolume}: ${Math.round((item._props.AmbientCompressorSendLevel+10 + item._props.EnvCommonCompressorSendLevel+7 + item._props.EnvNatureCompressorSendLevel+5 + item._props.EnvTechnicalCompressorSendLevel+7) * 10)/10}dB | ${i18n.Boost}: +${((gain + Math.abs(thresh+20)))}dB${item._props.Distortion ? ` | ${i18n.Distortion}: ${Math.round(item._props.Distortion * 100)}%` : ""}${newLine + newLine}`;
+						headsetDescription = `${i18n.AmbientVolume}: ${Math.round(((item._props as any).AmbientCompressorSendLevel+10 + (item._props as any).EnvCommonCompressorSendLevel+7 + (item._props as any).EnvNatureCompressorSendLevel+5 + (item._props as any).EnvTechnicalCompressorSendLevel+7) * 10)/10}dB | ${i18n.Boost}: +${((gain + Math.abs(thresh+20)))}dB${item._props.Distortion ? ` | ${i18n.Distortion}: ${Math.round(item._props.Distortion * 100)}%` : ""}${newLine + newLine}`;
 
 						// 						const headsetststs =
 						// 							`AmbientCompressorSendLevel: ${item._props.AmbientCompressorSendLevel}dB
@@ -1098,6 +1099,7 @@ Weight: ${ammoProps.Weight}
 					log("---")
 				}
 
+				// eslint-disable-next-line no-constant-condition
 				if (false) {
 					// ORM GEN
 					if (item._props.Ergonomics || item._props.Recoil || item._props.Accuracy) {
@@ -1131,6 +1133,7 @@ Weight: ${ammoProps.Weight}
 			}
 		}
 
+		// eslint-disable-next-line no-constant-condition
 		if (false) {
 			function compareNumbers(a, b) {
 				return parse(a) - parse(b)
@@ -1151,13 +1154,13 @@ Weight: ${ammoProps.Weight}
 		this.logger.success("[Item Info] Finished processing items, enjoy!")
 		if (translations.debug.enabled) {
 			const debugItemIDlist = [
-				"590a3efd86f77437d351a25b",
-				"5c0e722886f7740458316a57",
-				"5645bcc04bdc2d363b8b4572",
-				"590c621186f774138d11ea29",
-				"59faff1d86f7746c51718c9c",
-				"5c0e625a86f7742d77340f62",
-				"5bb20dcad4351e3bac1212da",
+				ItemTpl.BARTER_GAS_ANALYZER,
+				ItemTpl.VEST_ANA_TACTICAL_M1_PLATE_CARRIER_OLIVE_DRAB,
+				ItemTpl.HEADPHONES_PELTOR_COMTAC_II_HEADSET_OD_GREEN,
+				ItemTpl.INFO_SECURE_FLASH_DRIVE,
+				ItemTpl.BARTER_PHYSICAL_BITCOIN,
+				ItemTpl.ARMOR_BNTI_ZHUK_BODY_ARMOR_EMR,
+				ItemTpl.GASBLOCK_HK_416A5_LOW_PROFILE_GAS_BLOCK,
 			]
 			for (const debugItemID of debugItemIDlist) {
 				this.logger.info("---")
@@ -1411,13 +1414,13 @@ Weight: ${ammoProps.Weight}
 
 			let isBarter = false
 			for (const resource of barter.barterResources) {
-				if (resource._tpl === "5449016a4bdc2d6f028b456f") {
+				if (resource._tpl === ItemTpl.MONEY_ROUBLES) {
 					const rubles = resource.count
 					barterString += `${this.formatPrice(Math.round(rubles))}₽ + `
-				} else if (resource._tpl === "569668774bdc2da2298b4568") {
+				} else if (resource._tpl === ItemTpl.MONEY_EUROS) {
 					const euro = resource.count
 					barterString += `${this.formatPrice(Math.round(euro))}€ ≈ ${this.formatPrice(Math.round(this.euroRatio * euro))}₽ + `
-				} else if (resource._tpl === "5696686a4bdc2da3298b456a") {
+				} else if (resource._tpl === ItemTpl.MONEY_DOLLARS) {
 					const dollars = resource.count
 					barterString += `$${this.formatPrice(Math.round(dollars))} ≈ ${this.formatPrice(Math.round(this.dollarRatio * dollars))}₽ + `
 				} else {
@@ -1567,7 +1570,7 @@ Weight: ${ammoProps.Weight}
 
 					componentsString = componentsString.slice(0, componentsString.length - 3)
 
-					if (recipe.endProduct === "59faff1d86f7746c51718c9c") {
+					if (recipe.endProduct === ItemTpl.BARTER_PHYSICAL_BITCOIN) {
 						craftableString += `${translations[locale].Crafted} @ ${recipeAreaString}`
 						const bitcoinTime = recipe.productionTime
 						// prettier-ignore
@@ -1719,7 +1722,7 @@ Weight: ${ammoProps.Weight}
 							}
 							// prettier-ignore
 							unlockString += `↺ "${questName}"${traderName === questGiverName ? "" : ` ${questGiverName}`}✔ @ ${traderName} ${translations[locale].lv}${ll}${partString.length > 0 ? ` ∈ ${partString}` : ""}\n`
-							// if (trader == "6617beeaa9cfa777ca915b7c") {
+							// if (trader == Traders.REF) {
 							// 	log(`${this.getItemName(itemID, locale)}:\n${unlockString}`)
 							// }
 						}
