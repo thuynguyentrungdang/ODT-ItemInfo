@@ -637,7 +637,7 @@ class ItemInfo implements IPostDBLoadMod {
 				// let RarityPvE = item._props.RarityPvE
 				// log(`${this.getItemName(itemID)} | ${RarityPvE}`)
 				let isBanned = false
-				if (config.useBSGStaticFleaBanlist) {
+				if (config.useBSGStaticFleaBanlist.enabled) {
 					isBanned = bsgBlacklist.includes(itemID)
 				} else {
 					isBanned = !item._props.CanSellOnRagfair
