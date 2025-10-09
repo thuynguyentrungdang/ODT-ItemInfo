@@ -572,7 +572,7 @@ class ItemInfo implements IPostDBLoadMod {
 					// i.items.forEach((x) => this.questRewardsDB[questID].rewardBarterID[i.target].items.push(x._tpl))
 				})
 			}
- 			// */
+				// */
 		}
 
 		// ORM
@@ -816,7 +816,8 @@ class ItemInfo implements IPostDBLoadMod {
 						}
 					}
 
-					this.addColorToName(itemID, tiers_hexcode)
+					if (config.RarityRecolor.colorItemNames)
+						this.addColorToName(itemID, tiers_hexcode)
 
 					if (config.RarityRecolor.addTierNameToPricesInfo) {
 						if (tier?.length > 0) {
@@ -851,28 +852,25 @@ class ItemInfo implements IPostDBLoadMod {
 						// welcome to JS hell.
 						advancedAmmoInfoString = `Damage: ${ammoProps.Damage}
 Penetration Power: ${ammoProps.PenetrationPower}
-Armor Damage: ${ammoProps.ArmorDamage}${
-							ammoProps.ProjectileCount > 1
+Armor Damage: ${ammoProps.ArmorDamage}${ammoProps.ProjectileCount > 1
 								? `
 Projectile Count: ${ammoProps.ProjectileCount}`
 								: ""
-						}${
-							ammoProps.buckshotBullets
+							}${ammoProps.buckshotBullets
 								? `
 Buckshot Bullets: ${ammoProps.buckshotBullets}`
 								: ""
-						}
+							}
 Initial Speed: ${ammoProps.InitialSpeed}
 Speed Retardation: ${ammoProps.SpeedRetardation}
 Ballistic Coeficient: ${ammoProps.BallisticCoeficient}
 Ammo Tooltip Class: ${ammoProps.AmmoTooltipClass}
-Fragmentation Chance: ${Math.round(ammoProps.FragmentationChance * 100)}%${
-							ammoProps.MaxFragmentsCount > 1
+Fragmentation Chance: ${Math.round(ammoProps.FragmentationChance * 100)}%${ammoProps.MaxFragmentsCount > 1
 								? `
 Min Fragments Count: ${ammoProps.MinFragmentsCount}
 Max Fragments Count: ${ammoProps.MaxFragmentsCount}`
 								: ""
-						}
+							}
 Ricochet Chance: ${Math.round(ammoProps.RicochetChance * 100)}%
 Misfire Chance: ${Math.round(ammoProps.MisfireChance * 100)}%
 Malf Feed Chance: ${Math.round(ammoProps.MalfFeedChance * 100)}%
@@ -882,13 +880,12 @@ Heat Factor: ${ammoProps.HeatFactor}
 Heavy Bleeding Delta: ${ammoProps.HeavyBleedingDelta}
 Light Bleeding Delta: ${ammoProps.LightBleedingDelta}
 Stamina Burn Per Damage: ${ammoProps.StaminaBurnPerDamage}
-${
-	ammoProps.Tracer
-		? `Tracer: Yes
+${ammoProps.Tracer
+								? `Tracer: Yes
 Tracer Color: ${ammoProps.TracerColor}
 Tracer Distance: ${ammoProps.TracerDistance}`
-		: "Tracer: No"
-}
+								: "Tracer: No"
+							}
 Penetration Chance Obstacle: ${ammoProps.PenetrationChanceObstacle}
 Penetration Damage Mod: ${ammoProps.PenetrationDamageMod}
 Penetration Power Diviation: ${ammoProps.PenetrationPowerDiviation}
@@ -896,15 +893,14 @@ Accr(?): ${ammoProps.ammoAccr}
 Dist(?): ${ammoProps.ammoDist}
 Hear(?): ${ammoProps.ammoHear}
 Rec(?): ${ammoProps.ammoRec}
-Shift Chance(?): ${ammoProps.ammoShiftChance}${
-							ammoProps.ExplosionStrength
+Shift Chance(?): ${ammoProps.ammoShiftChance}${ammoProps.ExplosionStrength
 								? `
 Explosion Strength: ${ammoProps.ExplosionStrength}
 Max Explosion Distance: ${ammoProps.MaxExplosionDistance}
 Explosion Type: ${ammoProps.ExplosionType}
 HasGrenaderComponent: ${ammoProps.HasGrenaderComponent}`
 								: ""
-						}
+							}
 Bullet Mass Gram: ${ammoProps.BulletMassGram}
 Bullet Diameter Milimeters: ${ammoProps.BulletDiameterMilimeters}
 Weight: ${ammoProps.Weight}
@@ -988,13 +984,12 @@ Weight: ${ammoProps.Weight}
 				}
 
 				if (config.PricesInfo.enabled) {
-					priceString += `${
-						(config.PricesInfo.addFleaPrice ? `${i18n.Fleaprice}: ${this.formatPrice(fleaPrice)}${fleaPrice > 0 ? "₽" : ""} | ` : "") +
+					priceString += `${(config.PricesInfo.addFleaPrice ? `${i18n.Fleaprice}: ${this.formatPrice(fleaPrice)}${fleaPrice > 0 ? "₽" : ""} | ` : "") +
 						(config.PricesInfo.addItemValue ? `${i18n.ItemValue}: ${this.formatPrice(itemInHandbook.Price)} | ` : "") +
 						i18n.Valuation1 +
 						traderName +
 						i18n.Valuation2
-					}: ${this.formatPrice(traderPrice)}₽${newLine + newLine}`
+						}: ${this.formatPrice(traderPrice)}₽${newLine + newLine}`
 
 					// log(priceString)
 				}
@@ -1005,7 +1000,7 @@ Weight: ${ammoProps.Weight}
 						const thresh = item._props.CompressorThreshold
 						// prettier-ignore
 						// headsetDescription = `${i18n.AmbientVolume}: ${item._props.AmbientCompressorSendLevel+10}dB | ${i18n.Compressor}: ${i18n.Gain} +${gain}dB × ${i18n.Treshold} ${thresh}dB ≈ ×${Math.abs((gain * (thresh+20)) / 10)} ${i18n.Boost} | ${i18n.ResonanceFilter}: ${item._props.HighpassResonance}@${item._props.HighpassFreq}Hz | ${i18n.Distortion}: ${Math.round(item._props.Distortion * 100)}%` + newLine + newLine;
-						headsetDescription = `${i18n.AmbientVolume}: ${Math.round((item._props.AmbientCompressorSendLevel+10 + item._props.EnvCommonCompressorSendLevel+7 + item._props.EnvNatureCompressorSendLevel+5 + item._props.EnvTechnicalCompressorSendLevel+7) * 10)/10}dB | ${i18n.Boost}: +${((gain + Math.abs(thresh+20)))}dB${item._props.Distortion ? ` | ${i18n.Distortion}: ${Math.round(item._props.Distortion * 100)}%` : ""}${newLine + newLine}`;
+						headsetDescription = `${i18n.AmbientVolume}: ${Math.round((item._props.AmbientCompressorSendLevel + 10 + item._props.EnvCommonCompressorSendLevel + 7 + item._props.EnvNatureCompressorSendLevel + 5 + item._props.EnvTechnicalCompressorSendLevel + 7) * 10) / 10}dB | ${i18n.Boost}: +${((gain + Math.abs(thresh + 20)))}dB${item._props.Distortion ? ` | ${i18n.Distortion}: ${Math.round(item._props.Distortion * 100)}%` : ""}${newLine + newLine}`;
 
 						// 						const headsetststs =
 						// 							`AmbientCompressorSendLevel: ${item._props.AmbientCompressorSendLevel}dB
@@ -1652,9 +1647,8 @@ Weight: ${ammoProps.Weight}
 			for (const stage in area.stages) {
 				for (const requirement of area.stages[stage].requirements) {
 					if (requirement.templateId === itemID) {
-						hideoutString += `${translations[locale].Need} ×${requirement.count} > ${this.getCraftingAreaName(area.type, locale)} ${
-							translations[locale].lv
-						}${stage}\n`
+						hideoutString += `${translations[locale].Need} ×${requirement.count} > ${this.getCraftingAreaName(area.type, locale)} ${translations[locale].lv
+							}${stage}\n`
 					}
 				}
 			}
@@ -1745,7 +1739,7 @@ Weight: ${ammoProps.Weight}
 						if (item._tpl.includes(itemID)) {
 							// prettier-ignore
 							// unlockString += `${splitRewardString[0]}${traderName} ${translations[locale].lv}${ll}${splitRewardString[1]} > "${questName}"\n`
-							if (item._id !== results.target){
+							if (item._id !== results.target) {
 								partString = this.getItemName(results.items.find(x => x._id === results.target)._tpl, locale)
 							}
 							// prettier-ignore
